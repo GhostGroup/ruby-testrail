@@ -35,9 +35,9 @@ module TestRail
 
     def to_hash
       {
-        'case_id': @test_case.id,
-        'status_id': status_id,
-        'comment': comment
+        'case_id' => @test_case.id,
+        'status_id' => status_id,
+        'comment' => comment
       }
     end
 
