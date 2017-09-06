@@ -22,6 +22,8 @@ module TestRail
     def initialize(
       enabled: true,
       test_suite: nil,
+      run_id: nil,
+      custom_fields: {},
       url:,
       username:,
       password:,
@@ -31,12 +33,16 @@ module TestRail
       @enabled = enabled
       return unless @enabled
       if test_suite.nil?
-        testrail_client = TestRail::APIClient.new(url)
-        testrail_client.user = username
-        testrail_client.password = password
-        @test_suite = TestRail::TestRailClient.new(testrail_client).get_suite(
+        testrail_api_client = TestRail::APIClient.new(url)
+        testrail_api_client.user = username
+        testrail_api_client.password = password
+        @test_suite = TestRail::TestRailClient.new(
+          testrail_api_client,
+          run_id: run_id
+        ).get_suite(
           project_id: project_id,
-          suite_id: suite_id
+          suite_id: suite_id,
+          custom_fields: custom_fields
         )
       else
         @test_suite = test_suite
@@ -63,9 +69,14 @@ module TestRail
     # Checks to see if any of the tests in a particular test run have failed, if they have then the
     # it will leave the run opened. If there are no failed tests then it will call close the particular run.
     def end_test_run
+      send_test_run
+      @test_run.close unless @test_run.failure_count > 0
+    end
+
+    # Submits test results batch to test run
+    def send_test_run
       return if !@enabled || @test_run.nil?
       @test_run.submit_results
-      @test_run.close unless @test_run.failure_count > 0
     end
 
     protected

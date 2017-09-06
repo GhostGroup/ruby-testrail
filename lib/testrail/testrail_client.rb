@@ -18,29 +18,34 @@ module TestRail
 
   class TestRailClient
 
-    def initialize(testrail_http_client)
+    def initialize(testrail_http_client, run_id: nil)
       @testrail_http_client = testrail_http_client
+      @run_id = run_id
     end
 
-    def get_suite(project_id:, suite_id:)
+    def get_suite(project_id:, suite_id:, custom_fields: nil)
       TestSuite.new(
         project_id: project_id,
         suite_id: suite_id,
-        testrail_client: self)
+        testrail_client: self,
+        custom_fields: custom_fields)
     end
 
     def start_test_run(project_id:, suite_id:)
-      @testrail_http_client.send_post("add_run/#{project_id}",
-                                      suite_id: suite_id)
+      return @testrail_http_client.send_get("get_run/#{@run_id}") if @run_id.present?
+      @testrail_http_client.send_post("add_run/#{project_id}", suite_id: suite_id)
     end
 
     def close_test_run(run_id)
       @testrail_http_client.send_post("close_run/#{run_id}", {})
     end
 
-    def create_test_case(section_id:, name:)
-      @testrail_http_client.send_post("add_case/#{section_id}",
-                                      title: name)
+    def create_test_case(section_id:, name:, custom_fields: nil)
+      test_case_details = {
+        title: name
+      }
+      test_case_details.merge!(custom_fields) if custom_fields.present?
+      @testrail_http_client.send_post("add_case/#{section_id}", test_case_details)
     end
 
     def create_section(project_id:, suite_id:, section_name:)

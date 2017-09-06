@@ -26,7 +26,7 @@ module TestRail
     attr_accessor :password
 
     def initialize(base_url)
-      base_url += base_url =~ %r{/$} ? '/' : ''
+      base_url += base_url =~ %r{/$} ? '' : '/'
       @url = base_url + 'index.php?/api/v2/'
     end
 

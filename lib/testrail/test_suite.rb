@@ -20,7 +20,7 @@ module TestRail
 
   class TestSuite
 
-    def initialize(project_id:, suite_id:, testrail_client:)
+    def initialize(project_id:, suite_id:, testrail_client:, custom_fields: nil)
       @project_id = project_id
       @suite_id = suite_id
       @testrail_client = testrail_client
@@ -28,6 +28,7 @@ module TestRail
                                 .map { |s| new_test_section(s) }
       @sections_by_name = Hash[sections.map { |s| [s.name, s] }]
       @sections_by_id = Hash[sections.map { |s| [s.id, s] }]
+      @custom_fields = custom_fields
       @test_cases = Hash[testrail_client.get_test_cases(project_id: project_id, suite_id: suite_id)
                                         .lazy
                                         .map { |t| new_test_case(t) }
@@ -66,9 +67,12 @@ module TestRail
     end
 
     def create_test_case(section_id:, name:)
-      test_case = new_test_case(@testrail_client.create_test_case(
-                                  section_id: section_id,
-                                  name: name))
+      case_data = @testrail_client.create_test_case(
+        section_id: section_id,
+        name: name,
+        custom_fields: @custom_fields
+      )
+      test_case = new_test_case(case_data)
       @test_cases[test_case_key(test_case.section.id, test_case.name)] = test_case
     end
 
