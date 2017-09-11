@@ -26,7 +26,7 @@ module TestRail
     def initialize(test_case:, success:, comment:)
       @test_case = test_case
       @success = success
-      @comment = comment
+      @comment = comment.to_s
     end
 
     def status_id
