@@ -23,6 +23,7 @@ module TestRail
       enabled: true,
       test_suite: nil,
       run_id: nil,
+      run_name: nil,
       custom_fields: {},
       url:,
       username:,
@@ -38,7 +39,8 @@ module TestRail
         testrail_api_client.password = password
         @test_suite = TestRail::TestRailClient.new(
           testrail_api_client,
-          run_id: run_id
+          run_id: run_id,
+          run_name: run_name
         ).get_suite(
           project_id: project_id,
           suite_id: suite_id,
